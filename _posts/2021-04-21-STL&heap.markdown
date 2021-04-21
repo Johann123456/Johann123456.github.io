@@ -1,0 +1,158 @@
+---
+layout:     post
+title:      "STL优先级队列"
+# subtitle:   "what happened ?"
+# date:       "2021-04-21"
+# author:     "Johann"
+# # header-img: "img/post-bg-js-version.jpg"
+tags:
+    - STL
+    - 数据结构与算法
+---
+
+# STL中的优先级队列与堆排序
+## priority_queue(class T ,class Sequence = Vector, Class Compare = less<typename sequence:value_type>)
+### 用法
+- 使用优先级队列需要`#include &lt;queue&gt;`(所以`priority_queue`也没有迭代器)
+- STL的优先级队列可以实现对给定的数据按照优先级排序，并且插入和删除只需要$O(lgn)$复杂度，排序优先级取决于仿函数**Compare**，仿函数Compare是一个类（或者结构体），真正传入的是一个函数对象，比如可以定义一个类cmp，重载function call运算符`（）`：
+    ```C++
+    class cmp{
+    public:
+        bool operator()(const pair<int,int> &a, const pair<int,int> &b){
+            return a.second < b.second;
+        }
+    }
+    ```  
+    需要注意的是，这个operator()里面重载的运算是true的时候，证明a的优先级低于b的优先级，这也说明了为什么默认的Compare传入的是less却得到的是一个大顶堆（最大值在队列顶）
+- **成员函数**
+  ```C++
+  bool empty()
+  size_type size()
+  const_reference top() const {return c.front()} //c是底层vector c.front()返回的是元素而不是迭代器
+  void push(const value_type& x)//放入尾端再重排heap这一步复杂度应该是O(lgn)
+  void pop()//将队列顶端的元素删除
+  ```
+- 一个使用优先级队列的例子*leetcode-347*数组中的前k个高频元素
+  ```C++
+  class Solution{
+      public:
+      vector<int> topKFrequent(vector<int>& nums, int k){
+        using E = std::pair<int,int>
+        std::priority_queue<E, vector<E>, std::greater<E>> minHeap;//这里是一个小顶堆
+        unordered_map<int, int> counter;
+        for(auto e : nums){//遍历vector的方法，e是元素
+            ++counter[e];//向hashmap里面添加元素并统计
+        }
+        for(auto& x : counter){
+            //交换pair中的数字和频数的位置，因为pair依据第一个值来排序
+            auto pair_ = make_pair(x.second,x.first);
+            //如果堆满了，新进来的元素比堆顶（最小的）还小，就忽略
+            if(minHeap.size() == k){
+                if(pair_.first < minHeap.top()) continue;
+                minHeap.pop();
+                }
+            minHeap.push(move(pair_));//move可以节省空间    
+        }
+        std::vector<int> res(minHeap.size())
+        //遍历队列的一般形式
+        for(!minHeap.empty()){
+            res[--k] = minHeap.top().second;
+            minHeap.pop();
+        }
+    }
+  }
+  ```
+  - 这种题目的思路是，前K个最高频，那就维护一个k个元素的小顶堆，在堆满之后如果新来的元素是比堆顶还小，那就直接放弃，否则pop堆顶再把新元素入堆
+  - 这里面遍历堆的方式，用hashmap统计的方法可以学习
+  - 程序中向`vector<int>`插入pair_的使用用到了C++ 11的新特性**移动语义move()** 用move强制把pair_转化为具体的值，这样move之后原来的pair_就被“搬空”了，这样做可以避免临时变量copy的开销，这里有待继续研究**C++ 11新特性**
+- 这种统计频率的题应该都是先用hashmap统计频率，然后用堆，注意建堆的时候要大小为K，而不是所有元素都放到堆里面，这样复杂度就是$O(nlgk)$
+- *leetcode 451、692、215、973*都是这个思路
+## 堆排序
+  STL的`priority_queue`是一个配接器，即它只是一个对heap的封装，STL不提供heap的接口，只是用它作为底层容器。STL的堆与算法导论上的略有不同，但是也差不太多，所以先记录算法导论上的堆排序并结合*leetcode 215*来实现一下堆。
+
+### 堆的性质：
+- 用数组表示的堆，假定下标从1开始，则叶子节点的下标是$\lfloor n/2\rfloor+1...n$
+- `parent(i) = i/2`; `left(i) = 2i`; `right(2) = 2i + 1`;
+- 一个堆的高度为$\Theta(lgn)$
+
+建一个堆需要2个过程：`max_heapify()`、`build_maxheap`
+
+- `max_heapify()`维护堆的性质
+
+    这一步的复杂度是$O(h) = Olg(n)$
+  
+  ```C++
+  //维护堆的性质（根节点大于子女）,这是一个从上到下的过程
+  //维护的是第i个元素以及由于调整第i个元素导致的异常
+  void max_heapify(vector<int>& A, int i, int heap_size)
+  {
+      //因为是从0开始的所以左右子女是这种形式
+      int left = 2*i + 1, right = 2*i + 2, largest = i;
+      if(left < heap_size && A[left] > A[i]) largest = left;
+      if(right < heap_size && A[right] > A[largest]) largest = right;
+      if(largst != i)
+      {
+          swap(A[largest],A[largest]);
+          max_heapify(A, largest, heap_size);
+      }
+  }
+  ```
+- `build_maxheap`建堆
+
+    建堆需要从$n/2$开始执行到1，但是复杂度并不是$O(nlgn)$，而是$O(n)$证明在算法导论*p88*
+
+  ```C++
+  //建堆是一个从下往上的过程，从每个子树的根节点开始往上遍历去执行max_heapify进行调整
+  void build_heap(vector<int>& A)
+  {
+      int heap_size = A.size();
+      //注意下标从0开始
+      for(int i = len/2; i >=0; --i)
+      {
+          max_heapify(A, i, heap_size);
+      }
+  }
+  ```
+- `heap_sort`堆排序
+
+    堆排序复杂度是$O(nlgn)$
+  ```C++
+  void heap_sort(vector<int>& A)
+  {
+      build_heap(A);
+      int heap_size = A.size();
+      for(int i = 0; i < heap_size; ++i)
+      {
+          swap(A[0], A[heap_size - 1]);
+          --heap_size;
+          max_heapify(A, 0, heap_size);
+      }
+  }
+  ```
+
+- 堆插入`push_heap()`和删除`pop_heap()`元素
+    ```C++
+    //上溯，如果没到根节点且hole值大于父节点就交换hole父节点
+    void push_heap(const int &x, int heap_size)
+    {
+        A.resize(heap_size + 1);//增加一个元素
+        A[heap_size] = x;
+        int hole = heap_size - 1;
+        while(hole > 0 && A[hole] > A[(hole - 1) / 2])
+        {
+            swap(A[hole], A[(hole - 1) / 2]);
+            hole = (hole - 1) / 2;
+        }
+    }
+    void pop_heap(vector<int>& A, int heap_size)
+    {
+        int temp = A[0];//暂存堆顶,实际不需要……因为pop就是删除了
+        A[0] = A[heap_size-1];
+        --heap_size;
+        //直接调用调整根节点的函数
+        max_heapify(A, 0, heap_size);
+    }
+    ```
+
+
+
