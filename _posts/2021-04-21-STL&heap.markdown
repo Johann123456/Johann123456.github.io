@@ -14,7 +14,7 @@ tags:
 ## priority_queue(class T ,class Sequence = Vector, Class Compare = less<typename sequence:value_type>)
 ### 用法
 - 使用优先级队列需要`#include &lt;queue&gt;`(所以`priority_queue`也没有迭代器)
-- STL的优先级队列可以实现对给定的数据按照优先级排序，并且插入和删除只需要$ O\left \lgn\right $复杂度，排序优先级取决于仿函数**Compare**，仿函数Compare是一个类（或者结构体），真正传入的是一个函数对象，比如可以定义一个类cmp，重载function call运算符`（）`：
+- STL的优先级队列可以实现对给定的数据按照优先级排序，并且插入和删除只需要 O\left \lgn\right 复杂度，排序优先级取决于仿函数**Compare**，仿函数Compare是一个类（或者结构体），真正传入的是一个函数对象，比如可以定义一个类cmp，重载function call运算符`（）`：
     ```C++
     class cmp{
     public:
