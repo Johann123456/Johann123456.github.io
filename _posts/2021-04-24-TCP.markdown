@@ -69,7 +69,7 @@ UDP是无连接的，尽最大可能交付，没有拥塞控制，面向报文(�
 ### 1、HTTP
 **URL和URI** ：URI(Uniform Resource Identifier)统一资源标识符，为资源指定标识；URL(Uniform Resouce Location)统一资源定位符，标记一个资源并给出它的访问地址。  
 **HTTP方法**
-
+  
 
 | 方法 | 简介 | 功能 |
 | :------ | :------ | :------ |
@@ -79,9 +79,9 @@ UDP是无连接的，尽最大可能交付，没有拥塞控制，面向报文(�
 | head | 类似于get但是不返回报文主体数据，用以确认URI有效性以及资源更新时间 |  |
 | delete | 按请求URI删除指定资源 | 删除 |
 | options | 查询支持的http方法 |  |
-|trace|回显服务器收到的请求，用于测试和诊断|
-|connect|用管道协议进行TCP连接(SSL/TLS)|
-
+|trace|回显服务器收到的请求，用于测试和诊断||
+|connect|用管道协议进行TCP连接(SSL/TLS)||
+  
 
 - **get和post的区别**
   get请求数据在URL中，对所有人可见，数据最大长度2kb，可以被缓存，post请求数据不会显示在URL中，数据长度无限制，请求结果不会被缓存。
