@@ -1,0 +1,17 @@
+---
+layout:     post
+title:      "C++面试问题整理"
+subtitle:   "整理中…"
+date:       "2021-04-25"
+author:     "Johann"
+# # header-img: "img/post-bg-js-version.jpg"
+tags:
+    - C++基础
+---
+
+### 1、 C++中的三种继承方式：public、pravite、protected区别
+- public:可以被类中的函数、子类的函数、友元函数、类的对象访问
+- private:可以被类中的函数、友元函数访问，不能被**子类函数**、**类的对象访问**
+- protected:可以被类中的函数、**子类的函数**、友元函数访问，不能被**类的对象访问**
+### 2、智能指针
+
