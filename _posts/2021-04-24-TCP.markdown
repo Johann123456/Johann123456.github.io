@@ -34,7 +34,7 @@ TCP和UDP适用的场景：TCP适合金融等需要精确传输的场景、UDP�
         <th>应用层协议</th><th>应用</th><th>传输层协议</th>
     </tr>
     <tr>
-        <td>SMTP</td><td>电子邮件</td><td rowspan="4"align="center">TCP</td>
+        <td>SMTP</td><td>电子邮件</td><td rowspan="4">TCP</td>
     </tr>
     <tr>
         <td>TELNET</td><td>远程终端接入</td>
@@ -46,7 +46,7 @@ TCP和UDP适用的场景：TCP适合金融等需要精确传输的场景、UDP�
         <td>FTP</td><td>文件传输</td>
     </tr>
     <tr>
-        <td>DNS</td><td>域名转换</td><td rowspan="4"align="center">UDP</td>
+        <td>DNS</td><td>域名转换</td><td rowspan="4">UDP</td>
     </tr>
     <tr>
         <td>TFTP</td><td>文件传输</td>
@@ -121,13 +121,11 @@ TCP和UDP适用的场景：TCP适合金融等需要精确传输的场景、UDP�
 
 **响应报文状态码**
 
-
 | 1xx | 2xx | 3xx | 4xx | 5xx|
 | :------ | :------ | :------ | :------ | :------ |
 |信息性状态码，接收的请求正在处理|成功|重定向|客户端错误|服务器错误|
 
 **详细状态码：**     
-  
 
 | 状态码 | 名称 | 简介 |
 |---|---|---|
