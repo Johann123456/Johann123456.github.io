@@ -152,7 +152,7 @@ TCP和UDP适用的场景：TCP适合金融等需要精确传输的场景、UDP�
 |303 |See Other|告知客户端应该用另一个URL（该URL存在Location首部中）来获取资源，其主要目的是允许POST请求的响应将客户端定向到某个资源上去。在HTTP1.1生效|
 |304| Not Modified|此状态码适用于客户端发送了一个有条件的请求（ If-Match，If-ModifiedSince，If-None-Match，If-Range，If-Unmodified-Since ）。比如客户端想获取某个资源，并且是在XXX时间修改过的新的资源，如果这个资源没有修改，服务端就返回304给客户端|
 |305| Use Proxy|用来告诉客户端必须通过一个代理来访问资源，代理的位置在Location里|
-|306|还没用这个状态码||
+|306| |还没用这个状态码|
 |307| Temporary Redirect|临时重定向。该状态码与 302 Found 有着相同的含义。307 会遵照浏览器标准，不会从 POST 变成 GET|
 |400| Bad Request|该状态码表示请求报文中存在语法错误。|
 |401| Unauthorized|告诉客户端，要想获取资源的访问权，首先要对自己认证|
