@@ -14,7 +14,7 @@ tags:
 ## priority_queue(class T ,class Sequence = Vector, Class Compare = less<typename sequence:value_type>)
 ### 用法
 - 使用优先级队列需要`#include &lt;queue&gt;`(所以`priority_queue`也没有迭代器)
-- STL的优先级队列可以实现对给定的数据按照优先级排序，并且插入和删除只需要$O(\lg n)$复杂度，排序优先级取决于仿函数**Compare**，仿函数Compare是一个类（或者结构体），真正传入的是一个函数对象，比如可以定义一个类cmp，重载function call运算符`（）`：
+- STL的优先级队列可以实现对给定的数据按照优先级排序，并且插入和删除只需要$O(\lg n)$复杂度，排序优先级取决于**仿函数Compare**，仿函数Compare是一个类（或者结构体），比如可以定义一个类cmp，重载function call运算符`()`：
     ```C++
     class cmp{
     public:
@@ -24,6 +24,29 @@ tags:
     }
     ```  
     需要注意的是，这个operator()里面重载的运算是true的时候，证明a的优先级低于b的优先级，这也说明了为什么默认的Compare传入的是less却得到的是一个大顶堆（最大值在队列顶）
+### 仿函数与函数指针(sort与priority_queue)
+`sort()`的定义如下：
+```C++
+template<class RandomIt, class Compare>
+constexpr void sort(RandomIt first, RandomIt last, Compare comp);
+```
+sort是一个**模板函数**，sort第三个参数是一个对象，所以应该传入的是一个函数指针或者是一个函数对象（由于仿函数中重载了function call运算符，所以可以加个()生成一个函数对象）比如对于上面定义的cmp可以以如下形式调用：
+```C++
+sort(nums.begin(), nums.end(), cmp());//注意这里是cmp()，相当于是一个cmp类的对象
+```
+当然也可以传入一个函数指针，如下：
+```C++
+static bool cmp(const int &a, const int &b){
+    return a > b;
+}
+```
+但是要注意的是，这个函数必须要加**static**,不然成员函数的第一参数默认是**this指针**，这样自定义的cmp其实是有三个参数，而sort的比较函数需要两个参数，传入之后会报错。  
+
+priority_queue的定义：
+```C++
+template<class T, class Container = std::vector<T>, class Compare = std::less<type Container::value_type>> class priority_queue;
+```
+priority是一个**模板类**，类型参数表为T、Container和Compare,这三者都是**类**，所以priority_queue的第三个参数只能是一个仿函数（类）并且不能加()否则会变成函数对象。
 - **成员函数**
   ```C++
   bool empty()
