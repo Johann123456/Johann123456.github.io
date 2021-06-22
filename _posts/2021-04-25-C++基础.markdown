@@ -155,3 +155,142 @@ int main()
     vec.emplace_back(move(str1));//浅拷贝，右值str1会失效
 }
 ```
+### 5、复合委托和继承
+#### 复合表示has a
+```C++
+template <class T>
+class queue{
+protected:
+    deque<T> c;//底层容器,**复合**
+public:
+//queue使用deque作为底层容器，deque完全具备需要的功能，queue是一个配接器adapter
+    bool empty() const {return c.empty();}
+    size_type size() const{return c.size();}
+    reference front() {return c.front();}
+    reference back() {return c.back();}
+    void push(const value_type& x) {c.push_back(x);}
+    void pop() {c.pop_front();}
+};
+```
+构造函数和析构函数的执行顺序：**构造由内而外**，container先调用component的**默认**构造函数，然后执行自己的构造函数。**析构由外而内**，container先执行自己的析构函数，然后调用component的析构函数。这个是由编译器完成的，所以调用的是component默认构造函数。如果不想调用默认的需要自己去写构造顺序。
+
+### 委托 composition by reference
+```C++
+class stringrep;
+class string{
+public:
+    string();
+    string(const char* s);
+    string(const string& s);
+    string &operator=(const string& s);
+    ~string()
+private:
+    stringrep* rep;//委托，用指针相连 pointer to implemention(handle and body)
+};
+#include "string.hpp"
+namespace{
+    class stringrep{
+        friend class string;
+            stringrep(const char* s);
+            ~stringrep();
+            int count;
+            char* rep;
+    };
+}
+string::string(){...}
+```
+### 继承 表示is a即是一种
+```C++
+struct list_node_base
+{
+    list_node_base* next;
+    list_node_base* prev;
+};
+template<typename T>
+struct list_node:public list_node_base
+{
+    T data;
+};
+//父类数据完全被继承
+```
+![avatar](/img/inheritance.png)
+子类包含父类的成分，**构造由内而外，析构由外而内**。
+
+**父类的析构函数必须是virtual**
+### 虚函数与多态
+### 虚函数 inheritance with virtual functions
+继承当中：数据的继承要从内存考虑，函数的继承是继承了调用权。子类需要重新定义函数就要在父类里定义虚函数。
+- 虚函数：希望子类重新定义，但是已经有默认定义
+- 纯虚函数：子类一定要定义，有=0；
+```C++
+class shape{
+public:
+    virtual void draw() const = 0;//纯虚函数
+    virtual void error(const std::string& msg);//虚函数
+    int objectID() const;//非虚函数
+};
+```
+一个打开文件的例子
+```C++
+class cdocument{
+public:
+    OnFileOpen();
+    Read();//读内容应该是纯虚函数
+};
+cdocument::OnFileOpen(){
+    ...
+    void read()
+    ...
+}
+class cmydoc:public cdocument{
+public:
+    virtual void read(){...}
+}
+main()
+{
+    cmydoc mydoc;
+    ...
+    mydoc.OnFileOpen();//其实是cdocument::OnFileOpen(&mydoc);
+}
+```
+创建子类对象调用父类函数，所以执行顺序是
+主函数执行mydoc.OnFileOpen()实际上是执行cdocument::OnFileOpen(&mydoc)，传入了mydoc对象的this指针，执行OnFileOpen里面的read()的时候实际上是执行this->read,也就是(*(this->vptr)[n])(this);所以执行到了虚函数
+#### 例子：委托+继承 观察者模式
+```C++
+class subject{
+    int m_value;
+    vector<observer*> m_views;
+public:
+    void attach(observer* obs){
+        m_views.push_back(obs);
+    }
+    void set_val(int value){
+        m_value = value;
+        notify();
+    }
+    void notify(){
+        for(int i = 0; i < m_views.size(); ++i){
+            m_views[i]->update(this, m_value);
+        }
+    }
+};
+class observer{
+public:
+    virtual void update(subject* sub, int value) = 0;
+}
+```
+### 6、堆栈与内存管理
+- 栈：存在于某作用于内的一块内存，比如调用函数，韩束本身会形成一个栈，存放接收的参数，以及返回地址
+- 堆：操作系统提供的一块内存空间
+例如
+```C++
+class complex {};
+...
+{
+    complex c1(1,2);//调用构造函数，在栈上建立，离开作用域就被清理掉，又叫做auto object
+    static complex c1(1,2);//静态对象，离开作用域也不会消失
+    complex *p = new complex;//直到delete才回消失，delete调用析构函数。
+    delete p;
+}
+```
+内存泄漏就是没写delete，指针在离开作用域之后就消亡了，但是new出来的对象还没有消亡，因此再也没有机会delete p了。
