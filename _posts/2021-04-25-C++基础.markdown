@@ -9,9 +9,149 @@ tags:
     - C++基础
 ---
 
-### 1、 C++中的三种继承方式：public、pravite、protected区别
+### 1、C++中的三种继承方式：public、pravite、protected区别
 - public:可以被类中的函数、子类的函数、友元函数、类的对象访问
 - private:可以被类中的函数、友元函数访问，不能被**子类函数**、**类的对象访问**
 - protected:可以被类中的函数、**子类的函数**、友元函数访问，不能被**类的对象访问**
-### 2、智能指针
+### 2、操作符重载
+操作符重载都是作用在操作符左边的操作数上。
+#### 成员函数 this指针
 
+```C++
+inline complex&
+_doapl(complex* ths, const complex& r)
+{
+    ths->re += r.re;
+    ths->im += r.im;
+    return *ths;
+}
+
+inline complex&
+complex::operator += (const complex& r)//只用写操作符右边的变量
+{
+    return _doapl (this, r);
+}
+
+complex c2,c1;
+c2 += c1//这里调用+=之后传入c2的this指针，
+```
+
+成员函数都有一个this指针，所以二元操作符重载就是把操作符函数作用在左边的对象的this指针
+
+#### 非成员函数 无this指针，全局函数
+
+```C++
+inline complex
+operator + (const complex& x, const complex& y)
+{
+    return complex (real(x) + real(y), imag(x) + imag(y));//real和imag是之前定义的取实部和虚部的函数，这里省略了
+}
+```
+注意返回的不是`complex`而不是`complex&`，因为返回的是`local object`，是在函数里面创建的，函数执行完之后变量就消亡了，不能引用到了。
+
+**local object** : typename(),`complex(4, 5)`没有名字，执行完这一行就消亡了，因此local object是不能return by reference的。
+### 3、拷贝构造、拷贝赋值与析构
+```C++
+class string
+{
+public:
+    string (const char* cstr = 0);//默认构造函数
+    string (const string& str);//拷贝构造
+    string& operator = (const string& str);//拷贝赋值
+    ~string();//析构
+    char* get_c_str() const{return m_data;}
+private:
+    char* m_data;
+};
+
+inline string::string(const char* cstr = 0)
+{
+    if(cstr){
+        m_data = new char[strlen(cstr) + 1];
+        strcpy(m_data, cstr);
+    }
+    else{//没有初值
+        m_data = new char[1];
+        *m_data = '\0';
+    }
+}
+inline string::~string()
+{
+    delete[] m_data;
+}
+``` 
+#### 浅拷贝与深拷贝
+**浅拷贝**就是只拷贝指针，比如
+```C++
+string a("hello");
+string b("world");
+```
+如果没有自己写拷贝赋值，那么a=b将会造成a,b两个指针都指向hello,会导致内存泄漏（b指向的world没有指针指向了），以及更改a的时候b会受影响。
+
+**深拷贝**拷贝构造
+
+```C++
+inline string::string (const string& str)
+{
+    m_data = new char[strlen(str.m_data) + 1];
+    strcpy(m_data, str.m_data);
+}
+//拷贝构造调用的场景
+string c1("hello");
+string c2(c1);
+//或者
+string c2 = c1;//与上一行等价
+```
+**拷贝复制**
+```C++
+inline string& string::operator=(const string& str)
+{
+    if(this == & str) return *this;//检测是否是自我赋值，自我赋值会导致出错
+    delete[] m_data;
+    m_data = new char[strlen(str.m_data) + 1];
+    strcpy(m_data, str.m_data);
+    return *this
+}
+//用于以下场景
+string c1("hello");
+string c2("world");
+c2 = c1; 
+```
+### 4、右值引用与std::move()
+C++里面只有左值能被引用，而对于有些情况比如vector的push_back()操作，STL是支持右值作为参数的**浅拷贝**的**移动构造函数**和**移动赋值重载函数**，并且左值作为参数的时候需要做深拷贝，**参数为左值意味着拷贝，参数为右值意味着移动**
+```C++
+class array{
+public:
+//右值作为参数的构造函数
+    array(array&& temp_array){//右值引用是两个&
+        data_ = temp_array.data_;
+        size_ = temp_array.size_;
+        //防止temp_array析构时delete data_,（因为做了浅拷贝）
+        temp_array.data_ = nullptr;
+    }
+private:
+    int* data_;
+    int size_;
+}
+//使用方法
+int main(){
+    array a;
+    array b(std::move(a));//此处调用
+}
+```
+std::move(a)实际上做的是强制类型转换，把左值转换为右值
+```C++
+//vector中push_back支持右值作为参数
+void push_back(const value_type& val);//左值
+void push_back(value_type&& val);//右值
+void emplace_back(args&& args);
+//因此可以使用move
+int main()
+{
+    string str1 = "hello";
+    vector<string> vec;
+    vec.push_back(str1);//左值，深拷贝
+    vec.push_back(std::move(str1));//浅拷贝，右值str1会失效变成空
+    vec.emplace_back(move(str1));//浅拷贝，右值str1会失效
+}
+```

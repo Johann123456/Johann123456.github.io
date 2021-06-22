@@ -1,0 +1,129 @@
+---
+layout:     post
+title:      "排序算法"
+# subtitle:   "what happened ?"
+date:       "2021-05-13"
+author:     "Johann"
+# # header-img: "img/post-bg-js-version.jpg"
+tags:
+    - 排序算法
+---
+
+## 快速排序
+一种原址排序，时间复杂度$O(nlgn)$，空间复杂度$O(1)$，但是是不稳定排序，思路是找一个标准，然后左边放小于这个标准的，右边放大于这个标准的，然后不断递归，找标准的时候要用随机选取，避免最坏复杂度$O(n^2)$出现
+```C++
+void quicksort(vector<int> &A, int left, int right){
+    if(left < right){
+        int r = partition(A, left, right);
+        quicksort(A, left, r - 1);
+        quicksort(A, r + 1, right);
+    }
+}
+```
+`partition()`负责将A的[left,right]区间内的值按照标准进行划分，并把标准放到两拨数据中，返回标准的位置
+```C++
+int partition(vector<int> &A, int left, int right){
+    //用这个rand()要先srand((unsigned)time(NULL));
+    //但是这种方式不是很好但是用C++11的default_random_engine e和
+    //uniform_int_distribution<int> u(left,right)生成随机数其结果又是错的...不知道为什么
+    int k = rand()%(right - left + 1) + left;//生成left和right中间的随机数（包含两端）
+    swap(A[k], A[right]);
+    int x = A[right];//选择标准为最后一个元素（但是实际上是随机的）
+    int i = left - 1;//左指针，i左边都是小于x的
+    for(int j = left; j < right; ++j){//j是右指针，i和j中间都是不小于x的
+        if(A[j] < x){
+            swap(A[++i], A[j]);
+        }
+    }
+    swap(A[i + 1], A[r]);//交换i+1和r元素，因为都在i右边所以交换了也不会影响结果
+    return i + 1;
+}
+```
+## 堆排序
+STL的`priority_queue`是一个配接器，即它只是一个对heap的封装，STL不提供heap的接口，只是用它作为底层容器。STL的堆与算法导论上的略有不同，但是也差不太多，所以先记录算法导论上的堆排序并结合*leetcode 215*来实现一下堆。
+
+- 堆的性质：
+  - 用数组表示的堆，假定下标从1开始，则叶子节点的下标是$\lfloor n/2\rfloor+1...n$
+  - `parent(i) = i/2`; `left(i) = 2i`; `right(2) = 2i + 1`;
+  - 一个堆的高度为$\Theta(lgn)$
+
+建一个堆需要2个过程：`max_heapify()`、`build_maxheap`
+
+- `max_heapify()`维护堆的性质  
+
+这一步的复杂度是$O(h) = O(lg(n))$
+```C++
+//维护堆的性质（根节点大于子女）,这是一个从上到下的过程
+//维护的是第i个元素以及由于调整第i个元素导致的异常
+void max_heapify(vector<int>& A, int i, int heap_size)
+{
+    //因为是从0开始的所以左右子女是这种形式
+    int left = 2*i + 1, right = 2*i + 2, largest = i;
+    if(left < heap_size && A[left] > A[i]) largest = left;
+    if(right < heap_size && A[right] > A[largest]) largest = right;
+    if(largst != i)
+    {
+        swap(A[i],A[largest]);
+        max_heapify(A, largest, heap_size);
+    }
+}
+```
+- `build_maxheap`建堆
+
+建堆需要从$n/2$开始执行到1，但是复杂度并不是$O(nlgn)$，而是$O(n)$证明在算法导论*p88*
+
+```C++
+//建堆是一个从下往上的过程，从每个子树的根节点开始往上遍历去执行max_heapify进行调整
+void build_heap(vector<int>& A)
+{
+    int heap_size = A.size();
+    //注意下标从0开始
+    for(int i = len/2; i >=0; --i)
+    {
+        max_heapify(A, i, heap_size);
+    }
+}
+```
+- `heap_sort`堆排序
+
+堆排序复杂度是$O(nlgn)$
+```C++
+void heap_sort(vector<int>& A)
+{
+    build_heap(A);
+    int heap_size = A.size();
+    //把最大的放在最后，然后把size--，然后由于动了第0个元素，所以要调整堆
+    for(int i = 0; i < heap_size; ++i)
+    {
+        swap(A[0], A[heap_size - 1]);
+        --heap_size;
+        max_heapify(A, 0, heap_size);
+    }
+}
+```
+
+- 堆插入`push_heap()`和删除`pop_heap()`元素
+```C++
+//上溯，如果没到根节点且hole值大于父节点就交换hole父节点
+void push_heap(const int &x, int heap_size)
+{
+    A.resize(heap_size + 1);//增加一个元素
+    A[heap_size] = x;
+    int hole = heap_size - 1;
+    while(hole > 0 && A[hole] > A[(hole - 1) / 2])
+    {
+        swap(A[hole], A[(hole - 1) / 2]);
+        hole = (hole - 1) / 2;
+    }
+}
+//删除堆顶，把最后一个元素放到堆顶，然后调整堆
+void pop_heap(vector<int>& A, int heap_size)
+{
+    int temp = A[0];//暂存堆顶,实际不需要……因为pop就是删除了
+    A[0] = A[heap_size-1];
+    --heap_size;
+    //直接调用调整根节点的函数
+    max_heapify(A, 0, heap_size);
+}
+```
+## 冒泡排序
