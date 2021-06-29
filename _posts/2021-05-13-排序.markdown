@@ -35,7 +35,7 @@ int partition(vector<int> &A, int left, int right){
             swap(A[++i], A[j]);
         }
     }
-    swap(A[i + 1], A[r]);//交换i+1和r元素，因为都在i右边所以交换了也不会影响结果
+    swap(A[i + 1], A[right]);//交换i+1和r元素，因为二者都在i右边所以交换了也不会影响[ij之间都是大于等于i的i左边都是小于i的]这个结论
     return i + 1;
 }
 ```
