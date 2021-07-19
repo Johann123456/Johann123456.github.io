@@ -126,4 +126,8 @@ void pop_heap(vector<int>& A, int heap_size)
     max_heapify(A, 0, heap_size);
 }
 ```
+## 归并排序
+
+## 插入排序
+
 ## 冒泡排序
