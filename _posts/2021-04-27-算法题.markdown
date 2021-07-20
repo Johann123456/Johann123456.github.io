@@ -8,10 +8,29 @@ author:     "Johann"
 tags:
     - 算法
 ---
+- [leetcode题目](#leetcode题目)
+  - [168.excel表列名称](#168excel表列名称)
+  - [718.最长重复子数组](#718最长重复子数组)
+  - [300.最长递增子序列](#300最长递增子序列)
+  - [31.下一个排列](#31下一个排列)
+  - [33.搜索旋转排序数组](#33搜索旋转排序数组)
+  - [20.有效括号](#20有效括号)
+  - [236.二叉树最近公共祖先](#236二叉树最近公共祖先)
+  - [二叉树锯齿形遍历](#二叉树锯齿形遍历)
+  - [88.合并有序数组](#88合并有序数组)
+  - [219.存在重复元素II](#219存在重复元素ii)
+  - [415.字符串相加](#415字符串相加)
+  - [121.买卖股票最佳时机](#121买卖股票最佳时机)
+  - [142.环形链表II](#142环形链表ii)
+  - [160.相交链表](#160相交链表)
+  - [395.至少含有k个重复字符的最长子串](#395至少含有k个重复字符的最长子串)
+  - [15.三数之和](#15三数之和)
+  - [146.LRU缓存机制](#146lru缓存机制)
+  - [440.字典序第k小数字](#440字典序第k小数字)
+  - [215.数组中第k个最大元素](#215数组中第k个最大元素)
+  - [3.无重复最长字符串](#3无重复最长字符串)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
-# 动态规划
-## 背包问题
 ### 0-1背包
 **二维dp数组**
 每一件物品都有放和不放两种方案，dp[i][j]表示从0-i物品中任取，放到容量为j的背包，最大的价值
@@ -29,14 +48,245 @@ for(int i = 0; i < weight.size(); ++i){//物品
 }
 ```
 求组合数，先遍历物品，求排列数，先遍历背包容量leetcode518、377
-## 
-# 双指针
-## leetcode 76最小覆盖子串
-# 回溯
-# 图问题
-# 并查集
-# 贪心
-# 二叉树的遍历
-## 前序遍历
-## 后序遍历
-## 中序遍历
+
+## leetcode题目
+### 168.excel表列名称
+26进制转换，但是没有0，1对应A，26对应Z，`res += (r-1)%26+'A'`先转成0-25然后再加'A'转成对应字符，如果余数r是0就强行让r变成26，然后把数-26。
+```C++
+while(col>0){
+    int r = col%26;
+    if(r==0){
+        r = 26;
+        col -= 26;
+    }
+    res += r + 'A';
+    col /= 26;
+}
+
+```
+
+### 718.最长重复子数组
+两个数组重复的连续子数组最大长度，动态规划，`dp[i][j] = dp[i-1][j-1] + 1`优化成一维的，只需要保存当前位置左上角的元素upleft
+```C++
+for(int i = 0;i < m; ++i){
+    upleft = 0;
+    for(int j = 0;j < n; ++j){
+        int tmp = dp[j];//暂存更新前的j元素就是下一行的upleft
+        if(nums[i]==nums[j]){
+            dp[j] = (j==0)? 1 : upleft + 1;//把j=0的情况考虑在这
+            res = max(res, dp[j]);//结果必须在这更新
+        }
+        else{
+            dp[j] = 0;
+        }
+        upleft = tmp;
+    }
+}
+```
+
+### 300.最长递增子序列
+找到数组中最长严格递增**子序列**长度，动态规划，dp[i]表示以i为结尾的最长递增子序列长度
+```C++
+if(nums[i]>nums[j]){
+    dp[i] = max(dp[j]+1, dp[i]);
+}
+```
+
+### 31.下一个排列
+下一个排列，数学，从低位开始，找到递增的结尾的位置i，以及这个左边第一个比它大的位置j，交换i,j元素，并把i后面的反向
+
+### 33.搜索旋转排序数组
+旋转之后必有一边是有序的，二分法，注意左右边界
+```C++
+if(nums[mid]==target) return mid;//这里判断了mid后面关于mid的区间都不加等号
+if(nums[mid]<nums[right]){//右有序
+    if(target>nums[mid]&&target<=nums[right]){//这里区间开闭是因为前面判断了
+        left = mid + 1;
+    }
+}
+```
+
+### 20.有效括号
+三种括号，为了查询方便可以用哈希表key是右扩号，val是对应左括号，然后左括号入栈，右扩号看栈顶是否匹配以及栈是否为空（栈为空右扩号多），最后再看栈是否为空
+
+### 236.二叉树最近公共祖先
+递归，左右子树找p,q找到就返回，然后看pq是否为空，都不为空则是根节点，一个为空则另一个是祖先
+```C++
+if(root==nullptr||root=p||root==q){
+    return root;
+}
+TreeNode* left = lowest(root->left, p, q);
+TreeNode* right = lowest(root->right, p, q);
+if(!p&&!q) return root;
+return left==nullptr?right:left;
+```
+
+### 二叉树锯齿形遍历
+就是层序遍历，然后用一个双端队列暂存结果，标志位表示应该push_back()还是push_front()。
+```C++
+que.push(root);
+bool order = true;
+while(!que.empty()){
+    int n = que.size();
+    for(int i = 0; i < n;++i){
+        TreeNode* node = que.top();que.pop();
+        if(order){//正序
+            deq.push_back(node->val);
+        }
+        else{
+            deq.push_front(node->val);
+        }
+        if(node->left) que.push(node->left);
+        if(node->right) que.push(node->right);
+    }
+    order = !order;
+}
+```
+
+### 88.合并有序数组
+与链表不同，不能连接，遍历两个数组的时候要在两个都为空的时候再停止循环
+
+### 219.存在重复元素II
+数组中是否有下标间隔不超过k的相同元素，k个元素的滑动窗口（hashset），如果大小超过k则把最左边的删掉
+
+### 415.字符串相加
+字符串形式的数相加求和\
+模板
+```C++
+while(m>=0||n>=0||c!=0){//两个字符串和进位不为空
+    int a = (m>=0)? num1[m]-'0':0;
+    int b = (n>=0)? num2[n]-'0':0;
+    int ans = a + b + c;
+    res = ans%10+'0';
+    c = ans/10;
+    m--; n--;
+}
+```
+### 121.买卖股票最佳时机
+只进行一次交易，dp[i]表示第i天卖出的利润，dp[i]<0则dp[i]=0，新买一个股票
+`dp[i] = dp[i-1]+nums[i]-nums[i-1];`
+
+### 142.环形链表II
+快慢指针，相遇之后，让一个指针从头开始走，慢指针从相遇点开始走，他们会相遇在环入口
+```C++
+while(fast!=nullptr&&fast->next!=nullptr){
+    if(slow==fast){
+        while(p!=slow){
+
+        }
+        return p;
+    }
+}
+```
+
+### 160.相交链表
+两个指针，分别从头开始，如果到尾部再从另一个头开始。注意避免死循环。
+```C++
+while(p1!=p2){
+    p1 = p1==nullptr?headB:p1->next;//这里要让p1有机会是nullptr，所以判断的是p1而不是p1->next
+    p2 = p2==nullptr?headA:p2->next;
+}
+```
+
+### 395.至少含有k个重复字符的最长子串
+递归，先统计每个字符串的次数，按照不满足的位置进行切分，并更新结果，需要注意的是C++的split字符串要自己写
+```C++
+//按照某个字符分割字符串并删除这个字符
+vector<string> split(string s, char flag = ' '){
+    vector<string> res;
+    string temp;
+    istringstream iss(s);
+    while(getline(iss,temp,flag)){
+        res.push_back(temp);
+    }
+    return res;
+}
+int longestk(string s, int k){
+    if(s.length() < k) return 0;
+    unordered_map<char,int> table;
+    for(auto c:s){
+        table[c]++;
+    }
+    unordered_set<char> charset(s.begin(),s.end());
+    for(auto c:charset){
+        if(table[c]<k){
+            vector<string> temp = split(s, c);
+            for(auto str:temp){//递归
+                res = max(longest(s,k), res);
+            }
+            return res;
+        }
+        return res;
+    }
+    return s.length();
+}
+```
+
+### 15.三数之和
+固定最大的，然后双指针，要求不重复所以要判断最大的是否重复以及右指针是否重复
+```C++
+for(int m = n-1;m>=2;--m){
+    left = 0, right = m-1;
+    if(nums[m]==nums[m-1]) continue;
+    while(left<right){
+        while(nums[right]==nums[right+1]) right--;
+    }
+}
+```
+
+### 146.LRU缓存机制
+常数时间查找->哈希表，常数时间删除插入->链表，所以用链表维护值，用哈希表维护key和节点索引。
+
+### 440.字典序第k小数字
+给n和k，找1-n中字典序为k的。数学方法，其实也是个前缀树\
+需要用一个函数求当前数字为前缀并且在n范围内的数字共有多少个，然后对前缀数字i进行遍历
+```C++
+int getcount(int i, int n){
+    int cnt = 0, j = i + 1;
+    while(i <= n){
+        cnt += min(j,n)-i;
+        i = i*10;
+        j = j*10;
+    }
+    return cnt;
+}
+int findKnum(int n, int k){
+    int p = 1, i = 1;
+    while(p<k){
+        cnt = getcount(i);
+        if(p + cnt > n){
+            i = i*10;
+            p++;
+        }
+        else if(p+cnt<=n){
+            i++;
+            p += cnt;
+        }
+    }
+}
+```
+### 215.数组中第k个最大元素
+堆排序，快排，或者小顶堆\
+快速选择：
+```C++
+int quickfind(vector<int>& nums, int left, int right, int index){
+    int q = partion(nums,left,right);
+    if(q==index) return nums[q];
+    return index < q ? quickfind(nums,left,q-1,index):quick(nums,left,q-1,index);
+}
+res = quickfind(nums, 0, nums.size()-1, nums.size()-k);
+```
+
+### 3.无重复最长字符串
+双指针，维护哈希表，如果出现重复的就删除左端直到删除了哈希表里面的重复字符，否则插入
+```C++
+int right = 0;
+for(int left = 0;left<n;++i){
+    while(right<n && !charset.count(s[right])){
+        charset.insert(s[right]);
+        right++;
+    }
+    charset.erase(s[left]);
+    res = max(res, right-left);
+}
+```

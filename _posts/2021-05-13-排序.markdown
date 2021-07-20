@@ -127,7 +127,61 @@ void pop_heap(vector<int>& A, int heap_size)
 }
 ```
 ## 归并排序
-
+```C++
+void mergesort(vector<int>& nums, int left, int right){
+    if(left==right) return ;
+    int mid = left + (right - left)/2;
+    mergesort(nums, left, mid);
+    mergesort(nums, mid+1, right);
+    merge(nums, left, mid, right);
+}
+void merge(vector<int>& nums, int left, int mid, int right){
+    vector<int> tmp;
+    int midTemp = mid + 1;//右半边数组开始下标
+    int leftTemp = left;//左半边数组开始下标
+    while(leftTemp <= mid && midTemp <= right){//两段都在范围内，选小的放进来，并将对应指针+1;
+        tmp.push_back(nums[leftTemp]<nums[midTemp]?nums[leftTemp++]:nums[midTemp++]);
+    }
+    while(leftTemp<=mid){//只有左端在范围，说明右端已经放完了，只需要把左端放进来就行了
+        tmp.push_back(nums[leftTemp++]);
+    }
+    while(midTemp<=right){//只有右端在范围，左端放完，只需要把右端放进来
+        tmp.push_back(nums[midTemp++]);
+    }
+    int i = 0;//把当前结果放到原数组中
+    while(left <= right){
+        nums[left++] = tmp[i++];
+    }
+}
+```
 ## 插入排序
-
+```C++
+for(int j = 1;j < n;++j){
+    int key = nums[j];
+    int i = j - 1;
+    while(i>0&&nums[i]>key){//不断往前找到第一个小于等于key的数，做交换
+        nums[i+1] = nums[i];
+        i--;
+    }
+    nums[i+1] = key;
+}
+```
 ## 冒泡排序
+```C++
+void bubblesort(vector<int> nums){//找到逆序对就交换，每次都把最大的放最右边
+    for(int i = n-1; i > 0; --i){
+        for(int j = 0; j < i; ++j){
+            if(nums[j] < nums[j+1]){
+                swap(nums[j], nums[j+1]);
+            }
+        }
+    }
+}
+```
+| 名称 | 稳定性 | 时间复杂度 | 额外空间 |
+|---|---|---|---|
+|快排|不稳定|$nlogn$/n<sup>2</sup>|logn到n|
+|归并|稳定|$nlogn$/$nlogn$|n合并的时候需要创建临时数组|
+|堆|不稳定|$nlogn$/$nlogn$|O(1)|
+|插入|稳定|n<sup>2</sup>最好可以n|O(1)|
+|冒泡|稳定|n<sup>2</sup>最好可以n|O(1)|
