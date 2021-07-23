@@ -24,11 +24,25 @@ tags:
   - [142.环形链表II](#142环形链表ii)
   - [160.相交链表](#160相交链表)
   - [395.至少含有k个重复字符的最长子串](#395至少含有k个重复字符的最长子串)
-  - [15.三数之和](#15三数之和)
+  - [15.三数之和 611.有效三角形个数](#15三数之和-611有效三角形个数)
   - [146.LRU缓存机制](#146lru缓存机制)
   - [440.字典序第k小数字](#440字典序第k小数字)
   - [215.数组中第k个最大元素](#215数组中第k个最大元素)
   - [3.无重复最长字符串](#3无重复最长字符串)
+  - [206.反转链表 25.K个一组反转链表](#206反转链表-25k个一组反转链表)
+  - [1.两数之和](#1两数之和)
+  - [53.最大子序和](#53最大子序和)
+  - [21.合并有序链表](#21合并有序链表)
+  - [46.全排列](#46全排列)
+  - [47.全排列II](#47全排列ii)
+  - [54.螺旋矩阵](#54螺旋矩阵)
+  - [94.二叉树中序遍历、后序遍历](#94二叉树中序遍历后序遍历)
+  - [232.栈实现队列](#232栈实现队列)
+  - [200.岛屿数量](#200岛屿数量)
+  - [5.最长回文子串](#5最长回文子串)
+  - [22.链表倒数第k个节点](#22链表倒数第k个节点)
+  - [300.最长上升子序列](#300最长上升子序列)
+  - [2.两数之和](#2两数之和)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -162,6 +176,7 @@ while(m>=0||n>=0||c!=0){//两个字符串和进位不为空
     m--; n--;
 }
 ```
+
 ### 121.买卖股票最佳时机
 只进行一次交易，dp[i]表示第i天卖出的利润，dp[i]<0则dp[i]=0，新买一个股票
 `dp[i] = dp[i-1]+nums[i]-nums[i-1];`
@@ -222,7 +237,7 @@ int longestk(string s, int k){
 }
 ```
 
-### 15.三数之和
+### 15.三数之和 611.有效三角形个数
 固定最大的，然后双指针，要求不重复所以要判断最大的是否重复以及右指针是否重复
 ```C++
 for(int m = n-1;m>=2;--m){
@@ -289,4 +304,196 @@ for(int left = 0;left<n;++i){
     charset.erase(s[left]);
     res = max(res, right-left);
 }
+```
+
+### 206.反转链表 25.K个一组反转链表
+反转一个链表
+```C++
+while(cur){
+    nxt = cur->next;
+    cur->next = pre;//这里之前pre初始化为nullptr
+    pre = cur;
+    cur = nxt;
+}
+```
+k个一组反转，需要一个辅助的反转head和tail之间链表的函数
+```C++
+reverse(ListNode* head, ListNode* tail){
+    //这样执行完第一个节点翻转之后直接连在了链表尾，少做了一个拼接
+    pre = tail->next, cur = head, nxt = nullptr;
+    while(pre!=tail)//这里条件是pre!=tail，否则cur没到tail就结束了
+}
+//在head前建一个dummy节点，否则反转之后原来头结点不是现在头结点
+//tail是pre然后移动k步才是这段的tail
+reverseK(ListNode* head, int k){
+    pre = dummy,cur = head;
+    while(cur){
+        //更新tail
+        ListNode* tail = pre;
+        for(int i = 0;i < k; ++i){
+            tail = tail -> next;
+            if(tail==nullptr){//如果提前到了空节点证明不足k个
+                return dummy->next;
+            }
+        }
+        pre->next = reverse(cur,tail).first;//连接左端
+        pre = reverse(cur,tail).second;//更新pre
+        cur = pre->next;//更新cur
+    }
+}
+```
+
+### 1.两数之和
+先查找target-num[i],不存在则插入哈希表{num[i], i},减少一层循环
+
+### 53.最大子序和
+连续子数组最大和，dp[i]表示以i为结尾的最大子序和
+`dp[i] = max(dp[i-1]+nums[i], nums[i])`是选择累加还是重新开始。
+
+### 21.合并有序链表
+链表容易拼接，所以可以&&
+```C++
+ListNode* dummy = new ListNode(0);
+while(p1!=nullptr&&p2!=nullptr){
+    if(p1->val<=p2->val){
+    }
+    else{
+    }
+    p = p->next;
+}
+p->next = (p1==nullptr)? p2 : p1;
+```
+
+### 46.全排列
+无重复数字全排列，回溯
+```C++
+vector<vector<int>> permute(vector<int>& nums){
+    backtrack(res, nums, 0);
+}
+void backtrack(res, vector<int> nums, int index){
+    if(index==nums.size()){
+        res.push_back(nums);
+        return ;
+    }
+    for(int i = index;i < nums.size();++i){
+        swap(nums[index], nums[i])//往index位置填充
+        backtrack(res, nums, index+1);//填充下一个位置
+        swap(nums[index], nums[i]);//换回来
+    }
+}
+```
+
+### 47.全排列II
+有重复元素全排列
+
+
+### 54.螺旋矩阵
+顺时针螺旋打印矩阵，四个边界，需要判断是哪个边界到了
+```C++
+while(left<=right&&up<=down){
+    for(int i = left;i<=right;++i)//left->right
+    for(int i = top+1;i<=down;++i)//up->down
+    if(top!=down){//横着的长方形没有从右到左
+        for(int i = right-1;i>=left;--i)//right->left
+    }
+    if(left!=right){//竖着的长方形没有从下到上
+        for(int i = down-1;i>=up+1;--i)//down->up
+    }
+    left++;right--;up++;down--;
+}
+```
+
+### 94.二叉树中序遍历、后序遍历
+```C++
+//中序
+TreeNode* cur = root;
+while(cur!=nullptr||!stk.empty()){
+    while(cur!=nullptr){
+        stk.push(cur);
+        cur = cur->left;
+    }
+    cur = stk.top();stk.pop();
+    res.push_back(cur->val);
+    cur = cur->right;
+}
+//后续遍历
+TreeNode* cur = root;
+while(!stk.empty()||cur!=nullptr){
+    while(cur!=nullptr){
+        stk.push(cur);
+        cur = cur->left;
+    }
+    cur = stk.top();stk.pop();
+    if(cur->right==nullptr||cur->right==pre){//右节点是空或者是访问过的
+        res.push_back(cur->val);
+        pre = cur;
+        cur = nullptr;
+    }
+    else{//有右节点
+        stk.push(cur);
+        cur = cur->right;
+    }
+}
+//前序
+stk.push(root);
+while(!stk.empty()){
+    TreeNode* node = stk.top();stk.pop();
+    res.push_back(node->val);
+    if(node->left) stk.push(node->left);
+    if(node->right) stk.push(node->right);
+}
+```
+### 232.栈实现队列
+两个栈，一个输入，一个输出，当输出栈为空的时候把输入栈的都放到输出栈里
+
+### 200.岛屿数量
+深度优先遍历，遍历矩阵中每个元素，如果是‘1’并且没访问过则dfs把所有相邻的标记为访问过。执行dfs次数就是岛屿个数
+```C++
+void dfs(i,j,grid,vis){
+    for(k<4){
+        int dx = i + opt[k][0];
+        int dy = j + opt[k][1];
+        if(check(dx,dy)&&vis==false&&grid[dx][dy]=='1'){
+            dfs(dx,dy,grid,vis);
+        }
+    }
+}
+for()for(){
+    if(){
+        dfs(i,j,grid,vis);
+    }
+}
+```
+
+### 5.最长回文子串
+
+
+### 22.链表倒数第k个节点
+fast先走k步，然后跟slow一起走，快指针到结尾慢指针返回
+
+### 300.最长上升子序列
+`dp[i] = max(dp[j]+1, dp[i])`
+
+### 2.两数之和
+两个链表求和.
+```C++
+//定义结果的头尾节点
+ListNode* head = nullptr, *tail = nullptr
+while(p1||p2){
+    int a = p1!=nullptr? p1->val : 0;
+    int b = p2!=nullptr? p2->val : 0;
+    int sum = a + b + carry;
+    if(head==nullptr){//头节点为空则新建节点
+        head = tail = new ListNode(sum%10);
+    }
+    else{//在尾部插入
+        tail->next = new ListNode(sum%10);
+        tail = tail->next;
+    }
+    carry = sum / 10;
+    if(p1!=nullptr) p1 = p1->next;
+    if(p2!=nullptr) p2 = p2->next;
+}
+//最后要判断进位
+if(carry > 0) tail->next = new ListNode(carry);
 ```
