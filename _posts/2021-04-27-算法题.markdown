@@ -43,6 +43,14 @@ tags:
   - [22.链表倒数第k个节点](#22链表倒数第k个节点)
   - [300.最长上升子序列](#300最长上升子序列)
   - [2.两数之和](#2两数之和)
+  - [42.接雨水](#42接雨水)
+  - [101.对称二叉树](#101对称二叉树)
+  - [143.重排链表](#143重排链表)
+  - [112.路径总和](#112路径总和)
+  - [113.路径和II](#113路径和ii)
+  - [124.二叉树最大路径和](#124二叉树最大路径和)
+  - [合并区间](#合并区间)
+  - [缺失的第一个正数](#缺失的第一个正数)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -496,4 +504,130 @@ while(p1||p2){
 }
 //最后要判断进位
 if(carry > 0) tail->next = new ListNode(carry);
+```
+
+### 42.接雨水
+单调栈，横向计算，一个位置横向能盛水的容量取决于左右和当前位置高度差的最小值，所以维护一个递减栈，碰到递增点就把它当做right，然后边pop栈边更新栈顶横向能盛水的结果，**如果没有递增点就可以不用更新结果。**所以也不用插入额外的元素
+```C++
+for(int i = 0;i < n; ++i){
+    while(!stk.empty()&&height[stk.top()]<height[i]){
+        int cur = stk.top();stk.pop();
+        if(stk.empty()) break;//左边没有cur大的直接结束
+        left = stk.top();
+        right = i;
+        ans += (min(height[left],height[right])-height[cur])*(right-left-1);
+    }
+}
+```
+
+### 101.对称二叉树
+判断是否是镜像对称，递归，
+```C++
+bool check(TreeNode *p1, TreeNode *p2){
+    if(p1==nullptr&&p2==nullptr){
+        return true;
+    }
+    else if(p1==nullptr||p2==nullptr){
+        return false
+    }
+    else if(p1->val!=p2->val){
+        return false;
+    }
+    else{
+        return check(p1->left, p2->right)&&check(p1->right, p2->left);
+    }    
+}
+//迭代方法，层序遍历，两个指针u,v
+while(!que.empty()){
+    u = que.front();que.pop();
+    v = que.front();que.pop();
+    else if(u->val == v->val){
+        que.push(u->left);que.push(v->right);
+        que.push(u->right);que.push(v->left);
+    }
+}
+```
+
+### 143.重排链表
+拼接，第一个后面跟最后一个，第二个后面跟倒数第二个，找中点，反转后半部分，拼接，注意为了拼接方便需要让前半部分长一点
+```C++
+slow = head, fast = head;//slow是中点前一个节点，后半部分从slow->next开始
+while(fast->next!=nullptr&&fast->next->next!=nullptr){}
+```
+
+### 112.路径总和
+从根节点到叶子节点是否存在路径和为target，递归
+```C++
+bool find(TreeNode *root, int target){
+    if(root==nullptr){
+        return false;
+    }
+    if(root->val==target&&root->left==nullptr&&root->right==nullptr){//必须要到根节点
+        return true;
+    }
+    return find(root->left, target-root->val)||find(root->right, target-root->val);
+    
+}
+```
+
+### 113.路径和II
+找到和为target的根节点到叶子节点的路径，回溯
+```C++
+void backtrack(root,target,res,path){
+    if(!root) return ;
+    path.push_back(root->val);
+    if(target==root->val&&!root->left&&!root->right){
+        res.push_back(path);
+    }
+    backtrack(root->left,target-root->val,res,path);//查找root左边子树是否可以满足要求
+    backtrack(root->right,target-root->val,res,path);//查找右边子树能否满足要求
+    path.pop_back();//都不满足要求把这个节点从路径中pop
+}
+```
+
+### 124.二叉树最大路径和
+任意路径，可以不从根节点开始的所有路径和的最大值。递归，每个节点计算左右子树对该节点的贡献，如果到了叶子结点就返回0，如果贡献小于0，就让贡献为0，如同砍掉。还要分两种情况讨论：1、根节点向上连接，这时候左右子树只选一个。2、根节点不向上连接，左右子树都要选。
+```C++
+sum = INT_MIN//sum要初始化为负的最大，否则如果全是负数会返回0
+int maxpathsum(TreeNode *root, int &sum){
+    if(root==nullptr) return 0;
+    int left = maxpathsum(root->left, sum);//计算左边贡献并更新sum
+    int right = maxpathsum(root->right, sum);
+    sum = max(sum, root->val+left+right);//root不向上连接情况下的最大值
+    int outmax = root->val + max(left, right);//root向上连接情况下的贡献
+    return max(outmax, 0);//对外贡献小于0则直接砍掉
+}
+```
+
+### 合并区间
+区间重合直接合并，返回合并后的区间。按照左边界排序，边遍历边更新左右边界。
+```C++
+for(auto e:intervals){
+    if(e[0]<=right){
+        right = max(e[1], right);
+    }
+    else{//不相交
+        res.push_back({left,right});//如果不相交，先把上次的范围放到结果中
+        left = e[0];
+        right = e[1];
+    }
+}
+res.push_back({left,right});//最后一个放进来
+```
+
+### 缺失的第一个正数
+未排序数组，找出没出现的第一个正整数，时间O(n)，空间O(1)
+```C++
+//把数字当做下标放到对应位置，
+for(int i = 0; i < n; ++i){
+    while(nums[i]>0&&nums[i]<=n&&nums[nums[i]-1]!=nums[i]){//若有相同的数，则证明针对这个位置的交换已经完成
+        swap(nums[nums[i]-1], nums[i]);
+    }
+}
+for(int i = 0; i < n; ++i){
+    if(nums[i]!=i+1){
+        return i+1;
+    }
+}
+return n+1;//如果没有碰到不满足要求的，则说明数组里面的是从1-n的数
 ```
