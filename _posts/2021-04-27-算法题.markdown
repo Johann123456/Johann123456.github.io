@@ -49,8 +49,13 @@ tags:
   - [112.路径总和](#112路径总和)
   - [113.路径和II](#113路径和ii)
   - [124.二叉树最大路径和](#124二叉树最大路径和)
-  - [合并区间](#合并区间)
-  - [缺失的第一个正数](#缺失的第一个正数)
+  - [56.合并区间](#56合并区间)
+  - [41.缺失的第一个正数](#41缺失的第一个正数)
+  - [153.搜索旋转排序数组I/II](#153搜索旋转排序数组iii)
+  - [322.零钱兑换](#322零钱兑换)
+  - [165.比较版本号](#165比较版本号)
+  - [105.前序中序恢复二叉树](#105前序中序恢复二叉树)
+  - [链表快排](#链表快排)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -599,7 +604,7 @@ int maxpathsum(TreeNode *root, int &sum){
 }
 ```
 
-### 合并区间
+### 56.合并区间
 区间重合直接合并，返回合并后的区间。按照左边界排序，边遍历边更新左右边界。
 ```C++
 for(auto e:intervals){
@@ -615,7 +620,7 @@ for(auto e:intervals){
 res.push_back({left,right});//最后一个放进来
 ```
 
-### 缺失的第一个正数
+### 41.缺失的第一个正数
 未排序数组，找出没出现的第一个正整数，时间O(n)，空间O(1)
 ```C++
 //把数字当做下标放到对应位置，
@@ -630,4 +635,108 @@ for(int i = 0; i < n; ++i){
     }
 }
 return n+1;//如果没有碰到不满足要求的，则说明数组里面的是从1-n的数
+```
+
+### 153.搜索旋转排序数组I/II
+二分，没有相同元素则min到right之间一定是递增的，left到min左边一个也是递增的，并且`nums[right]<nums[left]`，所以可以用mid与right的大小关系判断min与mid关系
+```C++
+while(left<right){
+    if(nums[mid]<nums[right]){//mid在min右边
+        right = mid;
+    }
+    else if(nums[mid]>nums[right]){//mid在min左边
+        left = mid + 1;
+    }
+    else{//nums[mid]==nums[right]
+        right--;//有重复的则左移右端点
+    }
+}
+```
+
+### 322.零钱兑换
+背包问题，dp[j] = min(dp[j], dp[j-coins[i]]+1)
+```C++
+//最少的硬币个数
+for(i = 0;i < n; ++i){//物品
+    for(j = coins[i];j<amount;++j){//容量,可以用多次所以是++j
+        dp[j] = min(dp[j], dp[j-coins[i]]+1);//更新最小个数
+    }
+}
+//凑数数额的方法数
+dp[j] += dp[j-coins[i]];
+```
+
+### 165.比较版本号
+分割字符串存到数组，然后比较
+```C++
+//分割字符串
+vector<int> split(string s, char flag = '.'){
+    vector<int> res;
+    istringstream iss(s);
+    string temp = "";
+    while(getline(iss,temp,flag)){
+        int num = 0;
+        for(auto e:temp){
+            num = 10*num + e - '0';
+        }
+        res.push_back(num);
+    }
+    return res;
+}
+//比较的时候不够的认为是0
+for(i = 0; i < max(m,n); ++i){
+    int num1 = i < m? a[i] : 0;
+    int num2 = i < n? b[i] : 0
+}
+```
+
+### 105.前序中序恢复二叉树
+递归，前序的第一个节点是根节点，每次递归需要确定前序和中序遍历中的左右子树的整体位置
+```C++
+build tree(preorder,inorder,0,n-1,0,n-1);
+TreeNode* buildtree(vector<int>& preorder, vector<int>& inorder, int preleft, int preright, int inleft, int inright){
+    if(preleft > preright){//前序中左右相等是叶子节点，左>右则是空节点
+        return nullptr;
+    }
+    int rootindex = hashtable[preorder[preleft]];//中序遍历数组中root的下标
+    int lenleft = rootindex-preleft;//左子树长度
+    root = new TreeNode(inorder[rootindex]);
+    //左子树[preleft,preright]
+    root->left = buildtree(preorder,inorder,preleft+1,preleft+lenleft,inleft,rootindex-1);
+    //右子树
+    root->right = buildtree(preorder,inorder,preleft+1+lenleft,preright,rootindex+1,inright); 
+}
+```
+
+### 链表快排
+关键是如何划分
+```C++
+ListNode *sortlist(ListNode* head, nullptr){
+    if(head==nullptr||head->next==nullptr) return head;
+    ListNode* dummy = new ListNode(-1);
+    dummy->next = head;
+    quicksort(dummy,nullptr);
+}
+ListNode *quicksort(ListNode *head, ListNode *tail){
+    if(head==tail||head->next==tail||head->next->next==tail) return head;
+    ListNode *dummy = new ListNode(-1);
+    ListNode *partition = head->next, *p = head, *tp = dummy;
+    //对head和tail之间的链表按照partition进行划分
+    while(p->next!=tail){
+        if(p->next->val < partition->val){
+            tp->next = p->next;//连接到一个新的链表上
+            tp = tp->next;
+            p->next = p->next->next;//很关键！删除原链表里面的值，相当于把小的值的节点直接删掉了，连接到后面的节点上了
+        }
+        else{
+            p = p->next;//往下挪动一个节点
+        }
+    }
+    //将较小的值的链表插入到原链表中
+    tp->next = head->next;//右端
+    head->next = dummy->next;//左端
+    quicksort(head,partition);
+    quicksort(partition,tail);
+    return head->next;
+}
 ```
