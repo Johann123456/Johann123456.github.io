@@ -56,6 +56,7 @@ tags:
   - [165.比较版本号](#165比较版本号)
   - [105.前序中序恢复二叉树](#105前序中序恢复二叉树)
   - [链表快排](#链表快排)
+  - [32.最长有效括号](#32最长有效括号)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -738,5 +739,25 @@ ListNode *quicksort(ListNode *head, ListNode *tail){
     quicksort(head,partition);
     quicksort(partition,tail);
     return head->next;
+}
+```
+
+### 32.最长有效括号
+找到由（）组成的字符串里面的最长有效的括号长度。栈里面存放连续的合法括号的下标，栈底存放的是第一个不匹配的右扩号的下标
+```C++
+stk.push(-1);//后面会先pop再判断，放一个dummy元素方便操作
+for(int i = 0;i < n; ++i){
+    if(s[i]=='('){
+        stk.push(i);
+    }
+    else{
+        stk.pop();//匹配
+        if(stk.empty()){//动了栈底元素，证明不匹配了
+            stk.push(i);//更新栈底
+        }
+        else{
+            ans = max(ans, i-stk.top());//更新结果
+        }
+    }
 }
 ```
