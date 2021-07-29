@@ -32,7 +32,7 @@ tags:
   - [206.反转链表 25.K个一组反转链表](#206反转链表-25k个一组反转链表)
   - [1.两数之和](#1两数之和)
   - [53.最大子序和](#53最大子序和)
-  - [21.合并有序链表](#21合并有序链表)
+  - [21.合并有序链表，合并K个有序链表](#21合并有序链表合并k个有序链表)
   - [46.全排列](#46全排列)
   - [47.全排列II](#47全排列ii)
   - [54.螺旋矩阵](#54螺旋矩阵)
@@ -49,6 +49,7 @@ tags:
   - [112.路径总和](#112路径总和)
   - [113.路径和II](#113路径和ii)
   - [124.二叉树最大路径和](#124二叉树最大路径和)
+  - [110.平衡二叉树](#110平衡二叉树)
   - [56.合并区间](#56合并区间)
   - [41.缺失的第一个正数](#41缺失的第一个正数)
   - [153.搜索旋转排序数组I/II](#153搜索旋转排序数组iii)
@@ -57,6 +58,9 @@ tags:
   - [105.前序中序恢复二叉树](#105前序中序恢复二叉树)
   - [链表快排](#链表快排)
   - [32.最长有效括号](#32最长有效括号)
+  - [718.最长公共子数组](#718最长公共子数组)
+  - [151.翻转字符串里的单词](#151翻转字符串里的单词)
+  - [19.删除链表倒数第N个节点](#19删除链表倒数第n个节点)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -364,7 +368,7 @@ reverseK(ListNode* head, int k){
 连续子数组最大和，dp[i]表示以i为结尾的最大子序和
 `dp[i] = max(dp[i-1]+nums[i], nums[i])`是选择累加还是重新开始。
 
-### 21.合并有序链表
+### 21.合并有序链表，合并K个有序链表
 链表容易拼接，所以可以&&
 ```C++
 ListNode* dummy = new ListNode(0);
@@ -376,6 +380,39 @@ while(p1!=nullptr&&p2!=nullptr){
     p = p->next;
 }
 p->next = (p1==nullptr)? p2 : p1;
+```
+合并k个可以调用合并两个的操作，或者用优先队列
+```C++
+//调用合并两个的
+while(right){
+    left = 0;
+    while(left<right){
+        lists[left] = merge2list(lists[left],lists[right]);
+        left++;
+        right--;
+    }
+}
+//分治
+return merge(list,0,list.size()-1);
+ListNode* merge(vector<ListNode*>list,int left, int right){
+    if(left==right) return list[left];
+    if(left>right) return nullptr;
+    int mid = (left+right)/2;
+    return merge2List(merge(list,left,mid),merge(list,mid+1,right));
+}
+//优先队列
+priority_queue<ListNode*,vector<ListNode*>,cmp>
+for(auto e:list){
+    if(e) pq.push(e);
+}
+ListNode head, *p = &head;
+while(!pq.empty()){
+    auto node = pq.top();pq.pop();
+    p->next = node;
+    p = p->next;
+    if(node->next) pq.push(node->next);
+}
+return head.next;
 ```
 
 ### 46.全排列
@@ -480,7 +517,22 @@ for()for(){
 ```
 
 ### 5.最长回文子串
-
+dp[i][j] = dp[i+1][j-1]&&(s[i]==s[j]),ij之间的是回文串的前提是i-1和j-1之间的是回文串，并且s[i]=s[j]。遍历所有1到n的长度，长度为1和2的直接初始化，如果结果长度小于当前长度就更新结果。
+```C++
+for(int k = 1;k<=n;++k){
+    for(int i = 0;i<n-k+1;++i){
+        int j = i + k - 1;
+        if(1==k) dp[i][j] = true;
+        if(2==k) dp[i][j] = (s[i]==s[j])?true:false;
+        else{
+            dp[i][j] = dp[i+1][j-1]&&(s[i]==s[j]);
+        }
+        if(dp[i][j]&&res.size()<k){
+            res = s.substr(i,k);
+        }
+    }
+}
+```
 
 ### 22.链表倒数第k个节点
 fast先走k步，然后跟slow一起走，快指针到结尾慢指针返回
@@ -603,6 +655,21 @@ int maxpathsum(TreeNode *root, int &sum){
     int outmax = root->val + max(left, right);//root向上连接情况下的贡献
     return max(outmax, 0);//对外贡献小于0则直接砍掉
 }
+```
+
+### 110.平衡二叉树
+判断是否是平衡二叉树。自底向上递归，计算节点高度，如果高度差大于1则返回-1，否则返回高度`max(left,right)+1`，最后判断根节点高度是否>0，root为空的情况可以合并为>=0
+```C++
+int height(TreeNode* root){
+    if(root==nullptr) return 0;
+    int left = height(root->left);
+    int right = height(root->right);
+    if(left==-1||right==-1||abs(left-right)>1){
+        return -1;
+    }
+    return max(left,right)+1;
+}
+return height(root)>=0;
 ```
 
 ### 56.合并区间
@@ -760,4 +827,43 @@ for(int i = 0;i < n; ++i){
         }
     }
 }
+```
+
+### 718.最长公共子数组
+dp[i][j] = dp[i-1][j-1]+1,滚动数组优化一维，每次只需要记录左上角元素
+```C++
+for(int i=0;i<m;++i){
+    int upleft = 0;
+    for(int j=0;j<n;++j){
+        int temp = dp[j];//保存更改前的dp[j]，作为下一次更新的upleft
+        if(nums1[i]==nums2[j]){
+            dp[j] = upleft + 1;
+            ans = max(ans,dp[j]);
+        }
+        else{
+            dp[j] = 0;//这里是必须的，因为是一维滚动数组，不更新就是上一行的值
+        }
+    }
+}
+```
+
+### 151.翻转字符串里的单词
+先去掉多余的空格，然后反转整个句子，然后再反转每个单词
+```C++
+\\去掉头部中间尾部多余空格，双指针，最后再resize
+while(s[fast]==' '){
+    fast++;
+}
+for(;fast<n;++fast){
+    if(fast+1<n&&s[fast]==' '&&s[fast]==s[fast+1]) continue;
+    s[slow++] = s[fast];
+}
+if(s[slow-1]==' ') s.resize(slow-1);
+else s.resize(slow);//resize()里面的参数是长度
+```
+
+### 19.删除链表倒数第N个节点
+快慢指针，快指针先走n步，慢指针再走，快指针到null的时候，慢指针是要删除的，为了方便可以让慢指针到要删除的前一个，设定一个dummy节点，slow从dummy开始
+```C++
+ListNode dummy, *slow = &dummy, *fast = head;
 ```
