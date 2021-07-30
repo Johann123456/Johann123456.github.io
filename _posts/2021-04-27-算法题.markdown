@@ -4,7 +4,6 @@ title:      "算法题整理"
 subtitle:   "整理中…"
 date:       "2021-04-27"
 author:     "Johann"
-# # header-img: "img/post-bg-js-version.jpg"
 tags:
     - 算法
 ---
@@ -50,6 +49,7 @@ tags:
   - [113.路径和II](#113路径和ii)
   - [124.二叉树最大路径和](#124二叉树最大路径和)
   - [110.平衡二叉树](#110平衡二叉树)
+  - [226.翻转二叉树](#226翻转二叉树)
   - [56.合并区间](#56合并区间)
   - [41.缺失的第一个正数](#41缺失的第一个正数)
   - [153.搜索旋转排序数组I/II](#153搜索旋转排序数组iii)
@@ -59,8 +59,12 @@ tags:
   - [链表快排](#链表快排)
   - [32.最长有效括号](#32最长有效括号)
   - [718.最长公共子数组](#718最长公共子数组)
+  - [1143.最长公共子序列](#1143最长公共子序列)
   - [151.翻转字符串里的单词](#151翻转字符串里的单词)
   - [19.删除链表倒数第N个节点](#19删除链表倒数第n个节点)
+  - [470.rand7()生成rand10()](#470rand7生成rand10)
+  - [169.多数元素](#169多数元素)
+  - [208.Trie树](#208trie树)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -672,6 +676,19 @@ int height(TreeNode* root){
 return height(root)>=0;
 ```
 
+### 226.翻转二叉树
+每个子树都左右翻转，自底向上递归，
+```C++
+TreeNode* invertTree(TreeNode* root){
+    if(root==nullptr) return nullptr;
+    TreeNode* left = invertTree(root->left);
+    TreeNode* right = invertTree(root->right);
+    root->left = right;//交换左右子树
+    root->right = left;
+    return root;
+}
+```
+
 ### 56.合并区间
 区间重合直接合并，返回合并后的区间。按照左边界排序，边遍历边更新左右边界。
 ```C++
@@ -847,6 +864,22 @@ for(int i=0;i<m;++i){
 }
 ```
 
+### 1143.最长公共子序列
+dp[i][j]表示text1的第i个和text2的第j个两个子串的最长公共子串长度。
+```C++
+int m = s1.size(), n = s2.size();
+s1 = " "+s1;s2 = " "+s2;//为了让下标从1开始避免再初始化一遍 
+vector<vector<int>> dp(m+1,vector<int>(n+1,0));
+for(int i = 1;i <= m;++i){
+    for(int j = 1;j <= n;++j){
+        if(s1[i]==s2[j])
+            dp[i][j] = dp[i-1][j-1]+1;
+        else
+            dp[i][j] = max(dp[i-1][j],dp[i][j-1]);
+    }
+}
+return dp[m][n];
+```
 ### 151.翻转字符串里的单词
 先去掉多余的空格，然后反转整个句子，然后再反转每个单词
 ```C++
@@ -866,4 +899,77 @@ else s.resize(slow);//resize()里面的参数是长度
 快慢指针，快指针先走n步，慢指针再走，快指针到null的时候，慢指针是要删除的，为了方便可以让慢指针到要删除的前一个，设定一个dummy节点，slow从dummy开始
 ```C++
 ListNode dummy, *slow = &dummy, *fast = head;
+```
+
+### 470.rand7()生成rand10()
+randk()生成randm()套路，
+ans = k*(randk()-1)+randk();\
+然后取小于ans的最大n*m数
+然后返回ans%m+1;
+```C++
+int a,b,ans;
+do{
+    a = rand7(), b = rand7();
+    ans = (a-1)*7+b;
+}while(ans>40)
+return ans%10+1;
+```
+
+### 169.多数元素
+n个数的数组，有一个元素出现次数超过n/2，找出这个元素。排序返回nums[n/2]
+```C++
+//摩尔投票O(n),O(1)
+int majorityElement(vector<int>& nums){
+    int candidate = 0, vote = 0;
+    for(int n:nums){
+        if(0==vote) candidate = n;
+        if(n==candidate) vote++;
+        else if(n!=candidate) vote--;
+    }
+    return candidate;
+}
+```
+
+### 208.Trie树
+支持插入和搜索
+```C++
+class Trie {
+private:
+    vector<Trie*> children;
+    bool isend;
+    Trie* searchprefix(string s){
+        Trie* node = this;
+        for(char ch:s){
+            ch -= 'a';
+            if(node->children[ch]==nullptr){
+                return nullptr;
+            }
+            else{
+                node=node->children[ch];
+            }
+        }
+        return node;
+    }
+public:
+    Trie():children(26),isend(false) {}
+    void insert(string word) {
+        Trie* node = this;
+        for(char ch : word){
+            ch = ch-'a';//转化为数组下表
+            if(node->children[ch]==nullptr){
+                node->children[ch] = new Trie();//只有有字符的才有指向下一个节点的指针，否则就是nullptr;
+            }
+            node = node->children[ch];//节点下移
+        }
+        node->isend = true;
+    }  
+    bool search(string word) {
+        Trie* node = searchprefix(word);
+        return node!=nullptr&&node->isend;//还要看是不是字符串结尾
+    }
+    bool startsWith(string prefix) {
+        Trie* node = searchprefix(prefix);
+        return node!=nullptr;
+    }
+};
 ```
