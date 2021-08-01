@@ -159,7 +159,7 @@ void merge(vector<int>& nums, int left, int mid, int right){
 for(int j = 1;j < n;++j){
     int key = nums[j];
     int i = j - 1;
-    while(i>0&&nums[i]>key){//不断往前找到第一个小于等于key的数，做交换
+    while(i>=0&&nums[i]>key){//不断往前找到第一个小于等于key的数，做交换
         nums[i+1] = nums[i];
         i--;
     }

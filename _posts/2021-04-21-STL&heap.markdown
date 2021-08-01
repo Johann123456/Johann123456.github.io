@@ -16,7 +16,7 @@ tags:
 - STL的优先级队列可以实现对给定的数据按照优先级排序，并且插入和删除只需要$O(\lg n)$复杂度，排序优先级取决于**仿函数Compare**，仿函数Compare是一个类（或者结构体），比如可以定义一个类cmp，重载function call运算符`()`：
     ```C++
     class cmp{
-    public:
+    public://public不能少……
         bool operator()(const pair<int,int> &a, const pair<int,int> &b){
             return a.second < b.second;
         }

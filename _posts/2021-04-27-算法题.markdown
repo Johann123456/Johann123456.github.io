@@ -52,7 +52,7 @@ tags:
   - [226.翻转二叉树](#226翻转二叉树)
   - [56.合并区间](#56合并区间)
   - [41.缺失的第一个正数](#41缺失的第一个正数)
-  - [153.搜索旋转排序数组I/II](#153搜索旋转排序数组iii)
+  - [153.搜索旋转排序数组最小值I/II](#153搜索旋转排序数组最小值iii)
   - [322.零钱兑换](#322零钱兑换)
   - [165.比较版本号](#165比较版本号)
   - [105.前序中序恢复二叉树](#105前序中序恢复二叉树)
@@ -65,6 +65,7 @@ tags:
   - [470.rand7()生成rand10()](#470rand7生成rand10)
   - [169.多数元素](#169多数元素)
   - [208.Trie树](#208trie树)
+  - [三球排序](#三球排序)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -95,7 +96,7 @@ while(col>0){
         r = 26;
         col -= 26;
     }
-    res += r + 'A';
+    res += r - 1 + 'A';
     col /= 26;
 }
 
@@ -318,7 +319,7 @@ res = quickfind(nums, 0, nums.size()-1, nums.size()-k);
 双指针，维护哈希表，如果出现重复的就删除左端直到删除了哈希表里面的重复字符，否则插入
 ```C++
 int right = 0;
-for(int left = 0;left<n;++i){
+for(int left = 0;left<n;++left){
     while(right<n && !charset.count(s[right])){
         charset.insert(s[right]);
         right++;
@@ -627,8 +628,7 @@ bool find(TreeNode *root, int target){
     if(root->val==target&&root->left==nullptr&&root->right==nullptr){//必须要到根节点
         return true;
     }
-    return find(root->left, target-root->val)||find(root->right, target-root->val);
-    
+    return find(root->left, target-root->val)||find(root->right, target-root->val);   
 }
 ```
 
@@ -722,7 +722,7 @@ for(int i = 0; i < n; ++i){
 return n+1;//如果没有碰到不满足要求的，则说明数组里面的是从1-n的数
 ```
 
-### 153.搜索旋转排序数组I/II
+### 153.搜索旋转排序数组最小值I/II
 二分，没有相同元素则min到right之间一定是递增的，left到min左边一个也是递增的，并且`nums[right]<nums[left]`，所以可以用mid与right的大小关系判断min与mid关系
 ```C++
 while(left<right){
@@ -747,7 +747,7 @@ for(i = 0;i < n; ++i){//物品
         dp[j] = min(dp[j], dp[j-coins[i]]+1);//更新最小个数
     }
 }
-//凑数数额的方法数
+//凑出数额的方法数
 dp[j] += dp[j-coins[i]];
 ```
 
@@ -972,4 +972,26 @@ public:
         return node!=nullptr;
     }
 };
+```
+
+### 三球排序
+一个数组只有0、1、2。进行排序，要求O(n)。\
+三指针cur,left,right
+```C++
+int cur = 0, left = 0, right = n-1;
+while(cur <= right){
+    if(nums[cur]==0){
+        swap(nums[cur],nums[left]);
+        cur++;
+        left++;
+    }
+    else if(nums[cur]==1){
+        cur++;
+    }
+    else{
+        swap(nums[cur],nums[right]);
+        right--;
+    }
+    
+}
 ```
