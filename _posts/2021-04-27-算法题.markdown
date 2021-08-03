@@ -66,6 +66,8 @@ tags:
   - [169.多数元素](#169多数元素)
   - [208.Trie树](#208trie树)
   - [三球排序](#三球排序)
+  - [55.跳跃游戏](#55跳跃游戏)
+  - [39.组合总和I/II](#39组合总和iii)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -305,12 +307,12 @@ int findKnum(int n, int k){
 ```
 ### 215.数组中第k个最大元素
 堆排序，快排，或者小顶堆\
-快速选择：
+快速选择：快排的partition函数返回的是第q个元素的下标，左边都是比它小的，所以要找第k个就是找q==k时候的值
 ```C++
 int quickfind(vector<int>& nums, int left, int right, int index){
     int q = partion(nums,left,right);
     if(q==index) return nums[q];
-    return index < q ? quickfind(nums,left,q-1,index):quick(nums,left,q-1,index);
+    return index < q ? quickfind(nums,left,q-1,index):quickfind(nums,q+1,right,index);
 }
 res = quickfind(nums, 0, nums.size()-1, nums.size()-k);
 ```
@@ -993,5 +995,50 @@ while(cur <= right){
         right--;
     }
     
+}
+```
+
+### 55.跳跃游戏
+从第一个下标能否跳到最后一个下标。贪心，在每个能到达的位置更新一下当前能到的最远位置remote
+```C++
+int remote = nums[0];
+for(int i = 0;i <= remote; ++i){
+    remote = max(remote, nums[i]+i);
+    if(remote >= nums.size()-1) return true;
+}
+```
+
+### 39.组合总和I/II
+给定无重复元素数组，每个可以用无数次，找出和为target的组合。回溯
+```C++
+void backtrack(vector<int>& nums, vector<int>& path, int target, int index){
+    if(target<0) return;
+    if(target==0){
+        res.push_back(path);
+        return;
+    }
+    for(int i = index;i < nums.size();++i){
+        path.push_back(nums[i]);
+        backtrack(nums, path, target-nums[i], i);//这里从i开始表示可以用重复的同一个，但是每次都不能选前面的数字，防止重复
+        path.pop_back();
+        
+    }
+}
+```
+有重复数字，每个数字可以用一次
+```C++
+sort(nums.begin(),nums.end());
+void backtrack(nums,path,target,index){
+    if(target<0) return;
+    if(target==0){
+        res.push_back(path);
+        return ;
+    }
+    for(int i = index;i<nums.size();++i){
+        if(i>index&&nums[i]==nums[i-1]) continue; //递归层数相同的去重
+        path.push_back(nums[i]);
+        backtrack(nums,path,target,i+1);
+        path.pop_back();
+    }
 }
 ```
