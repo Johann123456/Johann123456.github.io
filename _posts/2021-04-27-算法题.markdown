@@ -68,6 +68,7 @@ tags:
   - [三球排序](#三球排序)
   - [55.跳跃游戏](#55跳跃游戏)
   - [39.组合总和I/II](#39组合总和iii)
+  - [46.全排列I/II](#46全排列iii)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -885,7 +886,7 @@ return dp[m][n];
 ### 151.翻转字符串里的单词
 先去掉多余的空格，然后反转整个句子，然后再反转每个单词
 ```C++
-\\去掉头部中间尾部多余空格，双指针，最后再resize
+//去掉头部中间尾部多余空格，双指针，最后再resize
 while(s[fast]==' '){
     fast++;
 }
@@ -1015,13 +1016,12 @@ void backtrack(vector<int>& nums, vector<int>& path, int target, int index){
     if(target<0) return;
     if(target==0){
         res.push_back(path);
-        return;
+        return ;
     }
     for(int i = index;i < nums.size();++i){
         path.push_back(nums[i]);
         backtrack(nums, path, target-nums[i], i);//这里从i开始表示可以用重复的同一个，但是每次都不能选前面的数字，防止重复
-        path.pop_back();
-        
+        path.pop_back(); 
     }
 }
 ```
@@ -1040,5 +1040,45 @@ void backtrack(nums,path,target,index){
         backtrack(nums,path,target,i+1);
         path.pop_back();
     }
+}
+```
+
+### 46.全排列I/II
+不重复数组，求全排列
+```C++
+void backtrack(vector<int>& nums,int index){
+    if(index==nums.size()){
+        res.push_back(nums);
+        return ;
+    }
+    for(int i = index; i < nums.size();++i){
+        swap(nums[i], nums[index]);
+        backtrack(nums,index + 1)//填充下一个格子
+        swap(nums[i], nums[index]);
+    }
+}
+```
+```C++
+void backtarck(vector<int>& nums ,vector<int>& path, vector<bool> vis){
+    if(path.size()==nums.size()){
+        res.push_back(path);
+        return ;
+    }
+    for(int i = 0;i < nums.size();++i){
+        if(vis[i]) continue;
+        vis[i] = true;
+        path.push_back(nums[i]);
+        backtarck(nums,path,vis);
+        path.pop_back();
+        vis[i] = false;
+    }
+}
+```
+有重复的数字
+```C++
+sort(nums.begin(),nums.end());
+for(int i = 0;i<nums.size();++i){
+    if(vis[i]) continue;//同一层的数字不能相同
+    if(i>0&&nums[i]==nums[i-1]&&!vis[i-1]) continue;//vis[i-1]=true同一支里面用过，如果是vis[i-1]=false同一层里用过
 }
 ```
