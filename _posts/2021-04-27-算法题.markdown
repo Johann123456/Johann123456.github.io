@@ -37,6 +37,7 @@ tags:
   - [54.螺旋矩阵](#54螺旋矩阵)
   - [94.二叉树中序遍历、后序遍历](#94二叉树中序遍历后序遍历)
   - [232.栈实现队列](#232栈实现队列)
+  - [队列实现栈](#队列实现栈)
   - [200.岛屿数量](#200岛屿数量)
   - [5.最长回文子串](#5最长回文子串)
   - [22.链表倒数第k个节点](#22链表倒数第k个节点)
@@ -69,6 +70,8 @@ tags:
   - [55.跳跃游戏](#55跳跃游戏)
   - [39.组合总和I/II](#39组合总和iii)
   - [46.全排列I/II](#46全排列iii)
+  - [138.复制带随机指针的链表](#138复制带随机指针的链表)
+  - [135.分发糖果](#135分发糖果)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -342,6 +345,20 @@ while(cur){
     cur = nxt;
 }
 ```
+递归方法
+n<sub>k-1</sub>->n<sub>k</sub>->n<sub>k+1</sub><-n<sub>k+2</sub> \
+n<sub>k+1</sub>已经完成了操作，所以要反转n<sub>k</sub>和n<sub>k+1</sub>就是`head->next->next = head`要注意防止有环要`head->next = nullptr`
+```C++
+
+ListNode *reverse(ListNode* head){
+    if(head==nullptr||head->next==nullptr) return head;
+    ListNode* node = reverse(head->next);
+    head->next->next = head;
+    head->next = nullptr;//防止有环
+    return node;
+}
+```
+
 k个一组反转，需要一个辅助的反转head和tail之间链表的函数
 ```C++
 reverse(ListNode* head, ListNode* tail){
@@ -502,8 +519,29 @@ while(!stk.empty()){
     if(node->right) stk.push(node->right);
 }
 ```
+
 ### 232.栈实现队列
 两个栈，一个输入，一个输出，当输出栈为空的时候把输入栈的都放到输出栈里
+
+### 队列实现栈
+一个队列就可以，相当于是首尾相连，每次push就把当前队列里面的内容都出队列然后再入一遍队列。（注意出队列是出口是que.front()）
+```C++
+class mystk{
+private:
+    queue<int> que;
+public:
+    mystk(){}
+    void push(int x){
+        int n = que.size();//获取插入之前的大小
+        que.push(x);
+        for(int i = 0;i < n; ++i){
+            que.push(que.front());
+            que.pop();
+        }
+    }
+    void pop(){que.pop();}
+};
+```
 
 ### 200.岛屿数量
 深度优先遍历，遍历矩阵中每个元素，如果是‘1’并且没访问过则dfs把所有相邻的标记为访问过。执行dfs次数就是岛屿个数
@@ -1082,3 +1120,32 @@ for(int i = 0;i<nums.size();++i){
     if(i>0&&nums[i]==nums[i-1]&&!vis[i-1]) continue;//vis[i-1]=true同一支里面用过，如果是vis[i-1]=false同一层里用过
 }
 ```
+
+### 138.复制带随机指针的链表
+带有一个随机指针指向链表一个随机节点，深拷贝。在原链表每个节点后面复制一个节点，然后再复制random指针。都复制完成后再拆开
+```C++
+//复制
+while(p){
+    tp = p->next;
+    p->next = new ListNode(p->val);
+    p->next->next = tp;
+    p = tp;
+}
+//复制random
+p=head;
+while(p){
+    p->next->random = p->random==NULL? NULL:p->random->next;
+    p = p->next->next;
+}
+//拆开
+ListNode *dummy = new ListNode(0), *tp = dummy;
+while(p!=NULL&&p->next!=NULL){
+    tp->next = p->next;
+    tp = tp->next;
+    p->next = p->next->next;
+    p = p->next;
+}
+```
+
+### 135.分发糖果
+保证分高的比两边的都多。两遍扫描
