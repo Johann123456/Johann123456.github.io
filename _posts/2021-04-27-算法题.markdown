@@ -72,6 +72,7 @@ tags:
   - [46.全排列I/II](#46全排列iii)
   - [138.复制带随机指针的链表](#138复制带随机指针的链表)
   - [135.分发糖果](#135分发糖果)
+  - [找到比左边元素都大比右边元素都小的下标](#找到比左边元素都大比右边元素都小的下标)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -1149,3 +1150,21 @@ while(p!=NULL&&p->next!=NULL){
 
 ### 135.分发糖果
 保证分高的比两边的都多。两遍扫描
+
+### 找到比左边元素都大比右边元素都小的下标
+先计算当前位置左边的最大值，右边的最小值，注意先把两端用数组两端赋值。
+```C++
+vector<int> left_max(n,0),right_min(n,0);
+left_max[0] = nums[0];
+right_min[n-1] = nums[n-1];
+for(int i = 1;i<n;++i){
+    left_max[i] = max(left_max[i-1],nums[i-1]);
+}
+for(int i = n-2;i>=0;--i){
+    right_min[i] = min(right_min[i+1],nums[i+1]);
+}
+for(int i = 0;i < n;++i){
+    if(nums[i]>left_max[i]&&nums[i]<right_min[i])
+        cout<<i<<endl;
+}
+```
