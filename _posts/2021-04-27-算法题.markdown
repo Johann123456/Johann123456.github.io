@@ -73,6 +73,7 @@ tags:
   - [138.复制带随机指针的链表](#138复制带随机指针的链表)
   - [135.分发糖果](#135分发糖果)
   - [找到比左边元素都大比右边元素都小的下标](#找到比左边元素都大比右边元素都小的下标)
+  - [71.简化路径](#71简化路径)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -281,6 +282,63 @@ for(int m = n-1;m>=2;--m){
 
 ### 146.LRU缓存机制
 常数时间查找->哈希表，常数时间删除插入->链表，所以用链表维护值，用哈希表维护key和节点索引。
+双向链表里面要保存key和val因为删除的时候需要用key
+
+```C++
+class LRU{
+private:
+    int capacity;
+    int size;
+    Node* head;//虚拟头尾节点
+    Node* tail;
+
+    void addToHead(Node* node){
+        node->next = head->next;
+        head->next = node;
+        node->pre = head;
+        node->next->pre = node;
+    }
+    void moveToHead(Node* node){
+        //断开node处并连接好前后，然后调用addToHead
+        removeNode(node);
+        addToHead(node);
+    }
+    void removeNode(Node* node){
+        node->pre->next = node->next;
+        node->next->pre = node->pre;
+    }
+    Node* removeTail(){
+        Node* node = tail->pre;//删除尾部的节点
+        removeNode(node);
+        return tmp;
+    }
+public:
+    LRU(int capacity):capacity(capacity),size(0),head(nullptr),tail(nullptr){
+        Node* head = new Node();
+        Node* tail = new Node();
+        head->next = tail;
+        tail->pre = tail;
+    }
+    void put(int key,int value){
+        if(cache.count(key)){
+            cache[key]->val = value;
+            moveToHead(cache[key]);
+        }
+        else{
+            Node* node = new Node(key,value);
+            addToHead(node);
+            cache[key] = node;
+            size++;
+            if(size>capacity){
+                Node* cur = removeTail();
+                cache.erase(cur->key);
+                size--;
+            }
+        }
+    }
+};
+```
+
 
 ### 440.字典序第k小数字
 给n和k，找1-n中字典序为k的。数学方法，其实也是个前缀树\
@@ -1166,5 +1224,27 @@ for(int i = n-2;i>=0;--i){
 for(int i = 0;i < n;++i){
     if(nums[i]>left_max[i]&&nums[i]<right_min[i])
         cout<<i<<endl;
+}
+```
+
+### 71.简化路径
+unix风格的路径
+```C++
+istringstream iss(path);
+string s,res;
+vector<string> stk;
+while(geline(iss,s,'/')){
+    if(s!=""&&s!="/"){//是/直接跳过
+        if(s!=".."){
+            stk.push_back(s);
+        }
+        else if(!stk.empty()){
+            stk.pop_back();
+        }
+    }
+}
+if(stk.empty()) res = "/";
+else{
+    for(auto e:stk) res+="/"+e;
 }
 ```
