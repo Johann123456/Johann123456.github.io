@@ -19,7 +19,24 @@ void quicksort(vector<int> &A, int left, int right){
         quicksort(A, r + 1, right);
     }
 }
+//迭代法
+void quicksort(vector<int>& nums, int left, int right){
+    stack<pair<int,int>> stk;
+    stk.push({left,right});
+    while(!stk.empty()){
+        left = stk.top().first;
+        right = stk.top().second;
+        stk.pop();
+        if(left<right){
+            int r = partition(nums,left,right);
+            stk.push({left,r-1});
+            stk.push({r+1,right});
+        }
+    }
+}
 ```
+
+
 `partition()`负责将A的[left,right]区间内的值按照标准进行划分，并把标准放到两拨数据中，返回标准的位置
 ```C++
 int partition(vector<int> &A, int left, int right){
