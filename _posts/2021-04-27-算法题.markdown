@@ -74,6 +74,9 @@ tags:
   - [135.分发糖果](#135分发糖果)
   - [找到比左边元素都大比右边元素都小的下标](#找到比左边元素都大比右边元素都小的下标)
   - [71.简化路径](#71简化路径)
+  - [98.验证二叉搜索树](#98验证二叉搜索树)
+  - [230.BST中的第k小元素](#230bst中的第k小元素)
+  - [83.删除排序链表中的重复元素I/II](#83删除排序链表中的重复元素iii)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -1246,5 +1249,64 @@ while(geline(iss,s,'/')){
 if(stk.empty()) res = "/";
 else{
     for(auto e:stk) res+="/"+e;
+}
+```
+
+### 98.验证二叉搜索树
+中序遍历，递归和迭代
+```C++
+long long pre = (long long) INT_MIN-1;
+bool isValid(TreeNode *root){
+    if(root==nullptr) return true;
+    if(!isValid(root->left)) return false;
+    if(pre>=root->val) return false;
+    pre = root->val;
+    return isValid(root->right);
+}
+```
+
+### 230.BST中的第k小元素
+中序遍历，计数到第k个
+```C++
+int kthSmallest(TreeNode* root,int k){
+    inorder(root,k);
+    return res;
+}
+void inorder(TreeNode* root, int k){
+    if(root==nullptr) return ;
+    inorder(root->left, k);
+    cnt++;
+    if(cnt==k){
+        res = root->val;
+        return ;
+    }
+    inorder(root->right, k);
+}
+```
+
+### 83.删除排序链表中的重复元素I/II
+重复的保留一个
+```C++
+cur = head;
+while(cur!=nullptr){
+    while(cur->next!=nullptr&&cur->val==cur->next->val){
+        cur->next = cur->next->next;
+    }
+    cur = cur->next;
+}
+```
+不保留重复的
+```C++
+ListNode *dummy = new ListNode(0,head), *cur = dummy;//防止删除头结点
+while(cur->next&&cur->next->next){
+    if(cur->next->val==cur->next->next->val){
+        int x = cur->next->val;
+        while(cur->next->next!=nullptr&&cur->next->next->val==x){
+            cur->next = cur->next->next;//只有跟x不等的才有机会成为cur的后继
+        }
+    }
+    else{
+        cur = cur->next;
+    }
 }
 ```
