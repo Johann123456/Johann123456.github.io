@@ -77,6 +77,8 @@ tags:
   - [98.验证二叉搜索树](#98验证二叉搜索树)
   - [230.BST中的第k小元素](#230bst中的第k小元素)
   - [83.删除排序链表中的重复元素I/II](#83删除排序链表中的重复元素iii)
+  - [26.删除有序数组中重复项I/II](#26删除有序数组中重复项iii)
+  - [152.乘积最大子数组](#152乘积最大子数组)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -1308,5 +1310,49 @@ while(cur->next&&cur->next->next){
     else{
         cur = cur->next;
     }
+}
+```
+
+### 26.删除有序数组中重复项I/II
+快慢指针
+```C++
+//重复的保留一个
+//slow指示出不同的元素需要放的位置
+slow = 1,fast = 1
+while(fast < n){
+    if(nums[fast]==nums[fast-1]){
+        fast++;
+    }
+    else{
+        nums[slow] = nums[fast];
+        slow++;
+        fast++;
+    }
+}
+return slow;
+
+//重复的保留两个
+//slow指示fast中与slow-2不同的元素要放的位置(即保证了slow和slow-2是不同的)
+while(fast < n){
+    if(nums[fast]==nums[slow-2]){
+        fast++;
+    }
+    else{
+        nums[slow] = nums[fast];
+        slow++;
+        fast++;
+    }
+}
+return slow;
+```
+### 152.乘积最大子数组
+dp,
+```C++
+fmax = nums[0],fmin = nums[0];
+for(int i = 0;i < n;++i){
+    int maxtmp = fmax,mintmp = fmin;//用临时变量，防止下面第一行执行完fmax就已经更新了
+    fmax = max(nums[i]*maxtmp, max(mintmp*nums[i],nums[i]));
+    fmin = min(nums[i]*mintmp,min(maxtmp*nums[i],nums[i]));
+    res = max(res,fmax);
 }
 ```
