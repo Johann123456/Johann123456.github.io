@@ -79,6 +79,7 @@ tags:
   - [83.删除排序链表中的重复元素I/II](#83删除排序链表中的重复元素iii)
   - [26.删除有序数组中重复项I/II](#26删除有序数组中重复项iii)
   - [152.乘积最大子数组](#152乘积最大子数组)
+  - [560.和为k的子数组](#560和为k的子数组)
 ### topk
 最大的，用小根堆，大于堆顶就push，然后pop堆顶；最小的，用大根堆，小于堆顶就push，然后pop堆顶；
 ### 0-1背包
@@ -1354,5 +1355,22 @@ for(int i = 0;i < n;++i){
     fmax = max(nums[i]*maxtmp, max(mintmp*nums[i],nums[i]));
     fmin = min(nums[i]*mintmp,min(maxtmp*nums[i],nums[i]));
     res = max(res,fmax);
+}
+```
+
+### 560.和为k的子数组
+子数组是连续的，所以计算前缀和prefix，prefix[i]-prefix[j-1]=k,看能否找到j-1，所以可以用哈希表暂存遍历过的前缀和prefix[i]以及出现的次数
+```C++
+unordered_map<int,int> table;
+table[0] = 1;//补充前缀和为0
+for(int i = 0;i < n; ++i){
+    if(i==0) prefix[i] = nums[i];
+    else{
+        prefix[i] = prefix[i-1]+nums[i];
+    }
+    if(table.count(prefix[i]-k)){
+        res += table[prefix[i]-k];
+    }
+    table[prefix[i]]++;//记录每个前缀和出现的次数
 }
 ```
